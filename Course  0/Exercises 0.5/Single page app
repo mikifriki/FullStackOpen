@@ -1,0 +1,12 @@
+browser -> server: Browser reaches the url and sens a GET to the server for spa.html
+server-->browser: spa.html
+browser -> server: main.css
+server-->browser: main.css
+browser -> server: spa.js
+server --> browser: spa.js
+browser -> server: data.json
+browser --> server: data.json
+note over browser:
+Browser runs spa.js to render the notes
+and sets the form id so it is ready to submit new notes from the form input
+end note

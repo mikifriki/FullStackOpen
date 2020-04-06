@@ -1,0 +1,21 @@
+user -> browser:User writes a new note into the input field of the form
+browser -> server: Browser sends users form after he/she submits the form.
+note over browser:
+When the form is submitted five http requests are made.
+end note
+server->browser: Server saves POST from browser and Responds with a redirect for the browser to do a GET request from /notes
+note over server:
+The server creates a new note object with the submitted data, then pushes it to the notes array
+end note
+browser-->browser: Browser reloads the /notes page.
+browser->server: Browser requests main.js
+server-->browser: main.js
+browser->server: Browser requests main.css
+server-->browser: main.css
+browser->server: Browser requests the data from data.json
+server-->browser:updated data.json
+
+note over browser:
+Browser runs the main.js file
+and creates new elements from the updated data.json
+end note

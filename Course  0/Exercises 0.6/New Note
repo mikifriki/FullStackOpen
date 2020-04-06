@@ -1,0 +1,12 @@
+user -> browser:User writes a new note into the input field of the form
+browser -> server: Browser sends users form after he/she submits the form.
+note over server:
+The post request to the address from the browser includes the JSON-data.
+The new request also has a content-type header in its request to tell the server the data is in JSON format.
+end note
+server --> browser: Server repsonds with a Success (code: 201 created) but does not redirect
+browser -> browser: Browser runs form.onSubmit from spa.js
+note over browser:
+The new note gets added to Notes array.
+Then the handler rerenders the note list on the page and sends the new note to the server.
+end note
