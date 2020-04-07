@@ -25,7 +25,6 @@ const AnecdotesFinal = () => {
 		}
 	};
 
-	console.log(max[0]);
 	return (
 		<div>
 			<p>{anecdotes[selected]}</p>
