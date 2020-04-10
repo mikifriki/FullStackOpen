@@ -1,6 +1,10 @@
-const Note = ({ note }) => {
+const Note = ({note, toggleImportance}) => {
+	const label = note.important ? 'make not important' : 'make important'
 	return (
-		<li>{note.content}</li>
+		<li>
+			<button onClick={toggleImportance}>{label}</button>
+			{note.content}
+		</li>
 	)
 };
 
@@ -10,28 +14,39 @@ const App = () => {
 	const [showAll, setShowAll] = useState(true);
 
 	useEffect(() => {
-		console.log('effect');
-		axios
-			.get('http://localhost:3001/notes')
-			.then(response => {
-				console.log('promise fulfilled')
-				setNotes(response.data)
+		noteService
+			.getAll()
+			.then(initialNotes => {
+				setNotes(initialNotes)
 			})
-	}, []);
+	}, [])
 
-	console.log('render', notes.length, 'notes');
+	const toggleImportanceOf = id => {
+		const note = notes.find(n => n.id === id)
+		const changedNote = {...note, important: !note.important}
+
+		noteService
+			.update(id, changedNote).then(response => {
+			setNotes(notes.map(note => note.id !== id ? note : response.data))
+		}).catch(error => {
+			alert(`the note '${note.content}', ${error} was already deleted from server`)
+			setNotes(notes.filter(n => n.id !== id))
+		})
+	};
+
 
 	const addNote = (event) => {
 		event.preventDefault()
 		const noteObject = {
 			content: newNote,
 			date: new Date().toISOString(),
-			important: Math.random() > 0.5,
-			id: notes.length + 1,
+			important: Math.random() > 0.5
 		};
 
-		setNotes(notes.concat(noteObject));
-		setNewNote('')
+		noteService.create(noteObject).then(response => {
+			setNotes(notes.concat(response.data));
+			setNewNote('')
+		})
 	};
 
 	const handleNoteChange = (event) => {
@@ -51,7 +66,7 @@ const App = () => {
 			</div>
 			<ul>
 				{notesToShow.map((note, i) =>
-					<Note key={i} note={note}/>
+					<Note key={i} note={note} toggleImportance={() => toggleImportanceOf(note.id)}/>
 				)}
 			</ul>
 			<form onSubmit={addNote}>
