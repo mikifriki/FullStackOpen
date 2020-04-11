@@ -3,12 +3,15 @@ import Filter from './Filter';
 import PersonForm from "./PersonForm";
 import Persons from "./Persons";
 import personService from '../../Services/persons';
+import Notification from "./Notifications";
 
 const App = () => {
 	const [persons, setPersons] = useState([]);
 	const [newName, setNewName] = useState('');
 	const [newNbr, setNewNbr] = useState('');
 	const [newfilter, setNewFilter] = useState('');
+	const [ statusMessage, setStatusMessage ] = useState('');
+	const [ statusType, setStatusType ] = useState('');
 
 	const handleClick = (e) => {
 		e.preventDefault();
@@ -36,8 +39,25 @@ const App = () => {
 				.then(returnedPersons => {
 					setPersons(persons.concat(returnedPersons));
 				});
+			setStatusMessage(`Added ${newName}`)
+			setStatusType('success')
+			setTimeout(() => {
+				setStatusMessage(null)
+			}, 5000)
+				.catch(error => {
+					setStatusMessage(
+						`The entry for '${newName}' was already deleted from the server`
+					);
+					setStatusType('error');
+					setTimeout(() => {
+						setStatusMessage(null)
+					}, 5000)
+					setPersons(persons.filter(p => p.id !== newPersons.id));
+				});
+
 			setPersons(persons.concat(newPersons));
-		}
+		};
+
 		setNewName('');
 		setNewNbr('');
 	};
@@ -76,9 +96,12 @@ const App = () => {
 			.then(initialNotes => {
 				console.log(initialNotes);
 				setPersons(initialNotes)
-			})
+			});
+
 
 	}, []);
+
+
 
 	const handlePersonsChange = (e) => {
 		setNewName(e.target.value)
@@ -107,6 +130,7 @@ const App = () => {
 	return (
 		<div>
 			<h1>Phonebook</h1>
+			<Notification status={statusMessage}/>
 			Filter with <Filter onChange={handleFilter}/>
 			<h3>Add a new</h3>
 			<PersonForm onNameChange={handlePersonsChange} nameValue={newName} numberValue={newNbr}
