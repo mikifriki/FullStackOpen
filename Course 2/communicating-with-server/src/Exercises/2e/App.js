@@ -10,8 +10,8 @@ const App = () => {
 	const [newName, setNewName] = useState('');
 	const [newNbr, setNewNbr] = useState('');
 	const [newfilter, setNewFilter] = useState('');
-	const [ statusMessage, setStatusMessage ] = useState('');
-	const [ statusType, setStatusType ] = useState('');
+	const [statusMessage, setStatusMessage] = useState('');
+	const [statusType, setStatusType] = useState('');
 
 	const handleClick = (e) => {
 		e.preventDefault();
@@ -24,10 +24,20 @@ const App = () => {
 		} else if (nameExists && !numberExists) {
 			if (window.confirm(`${newName} is already added to the phonebook. Replace ${newName}s number?`)) {
 				updateNumber(newName, newNbr);
+				setStatusMessage(`Updated ${newName}'s number to ${newNbr}`);
+				setStatusType('success');
+				setTimeout(() => {
+					setStatusMessage(null)
+				}, 5000)
 			}
 		} else if (numberExists && !nameExists) {
 			if (window.confirm(`${newNbr} is already added to the phonebook. Replace ${newNbr} owner?`)) {
 				updateName(newNbr, newName);
+				setStatusMessage(`Updated ${newNbr}'s owner to ${newName}`);
+				setStatusType('success');
+				setTimeout(() => {
+					setStatusMessage(null)
+				}, 5000)
 			}
 		} else {
 			const newPersons = {
@@ -39,25 +49,13 @@ const App = () => {
 				.then(returnedPersons => {
 					setPersons(persons.concat(returnedPersons));
 				});
-			setStatusMessage(`Added ${newName}`)
-			setStatusType('success')
+			setStatusMessage(`Added ${newName}`);
+			setStatusType('success');
 			setTimeout(() => {
 				setStatusMessage(null)
 			}, 5000)
-				.catch(error => {
-					setStatusMessage(
-						`The entry for '${newName}' was already deleted from the server`
-					);
-					setStatusType('error');
-					setTimeout(() => {
-						setStatusMessage(null)
-					}, 5000)
-					setPersons(persons.filter(p => p.id !== newPersons.id));
-				});
-
 			setPersons(persons.concat(newPersons));
-		};
-
+		}
 		setNewName('');
 		setNewNbr('');
 	};
@@ -73,14 +71,24 @@ const App = () => {
 						return returnedEntry
 					}
 				}))
-			})
+			}).catch(error => {
+			console.log(error);
+			setStatusMessage(
+				`The entry '${nameID}' has already been deleted from the server`
+			);
+			setStatusType('error');
+			setTimeout(() => {
+				setStatusMessage(null)
+			}, 5000);
+			setPersons(persons.filter(p => p.id !== nameID))
+		})
 	};
 
 	const updateNumber = (name, number) => {
 		const entry = persons.find(person => person.name === name);
 		const entryID = entry.id;
 		const modifiedEntry = {...entry, number: number};
-		serviceRunner(entryID, modifiedEntry);
+		serviceRunner(entryID, modifiedEntry)
 	};
 
 	const updateName = (number, name) => {
@@ -102,11 +110,10 @@ const App = () => {
 	}, []);
 
 
-
 	const handlePersonsChange = (e) => {
 		setNewName(e.target.value)
 	};
-	const handleNmbrChange = (e) => {
+	const handleNbrChange = (e) => {
 		setNewNbr(e.target.value)
 	};
 	const handleFilter = (e) => {
@@ -121,8 +128,14 @@ const App = () => {
 				.remove(id)
 				.then(returnedPersons => {
 					setPersons(returnedPersons)
-				})
-				.then(console.log('retrieved updated entries'))
+				});
+			setStatusMessage(
+				`The entry '${id}' was successfully removed from the server`
+			);
+			setStatusType('warning');
+			setTimeout(() => {
+				setStatusMessage(null)
+			}, 5000)
 		}
 	};
 
@@ -130,11 +143,11 @@ const App = () => {
 	return (
 		<div>
 			<h1>Phonebook</h1>
-			<Notification status={statusMessage}/>
+			<Notification status={statusMessage} statusType={statusType}/>
 			Filter with <Filter onChange={handleFilter}/>
 			<h3>Add a new</h3>
 			<PersonForm onNameChange={handlePersonsChange} nameValue={newName} numberValue={newNbr}
-						onNumberChange={handleNmbrChange} onSubmit={handleClick}/>
+						onNumberChange={handleNbrChange} onSubmit={handleClick}/>
 			<h2>Numbers</h2>
 			<Persons deleteEntry={deleteEntry} people={personsToShow}/>
 		</div>
